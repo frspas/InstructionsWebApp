@@ -1,30 +1,6 @@
 const Comment = require("../models/commentModel");
 const Post = require("../models/postModel");
 const User = require("../models/authModel");
-/*const updatePost = async (res, req, next) => {
-  try {
-
-    console.log(postRate);
-
-    req.postRate = postRate;
-    next();
-  } catch (e) {
-    res.status(400).json({ error: e.message });
-  }
-};
-*/
-/*
-const updateUser = async (req, res, next) => {
-  try {
-    const postsRates = await Post.find();
-
-    const newComment = req.newComment;
-    const postRate = req.postRate;
-    res.json({ newComment, postRate });
-  } catch (e) {
-    res.status(400).json({ error: e.message });
-  }
-};*/
 
 const postComment = async (req, res, next) => {
   const { content, postId, userName } = req.body;
@@ -61,7 +37,8 @@ const postComment = async (req, res, next) => {
 
     const l = rates.length === 0 ? 1 : rates.length;
     sum = sum / l;
-
+    sum.toFixed(2);
+    console.log(sum);
     var postRate = await Post.findOneAndUpdate(
       {
         _id: postId,
@@ -81,18 +58,16 @@ const getComments = async (req, res) => {
   const { postId } = req.body;
   try {
     let allComments = await Comment.find({ postId }).sort({ _id: -1 });
-
     const commentsWithImages = await Promise.all(
       allComments.map(async (comment) => {
         const user = await User.findOne(
           { _id: comment.userId },
           { _id: 0, password: 0 }
         );
-        console.log(comment._doc)
-        return { ...user._doc, ...comment._doc };
+        const userAndComment = { ...user._doc, ...comment._doc };
+        return userAndComment;
       })
     );
-
     res.json(commentsWithImages);
   } catch (e) {
     res.status(400).json({ error: e.message });
